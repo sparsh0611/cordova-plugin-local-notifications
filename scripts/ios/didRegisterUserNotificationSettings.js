@@ -115,7 +115,20 @@ module.exports = function (context) {
         "    [center postNotificationName:UIApplicationRegisterUserNotificationSettings\n" +
         "                          object:settings];\n" +
         "}\n" +
-        "#endif\n";
+        "#endif\n" + 
+        "\n - (void) application:(UIApplication *)application\n" +
+            "handleActionWithIdentifier:(NSString *)identifier\n" +
+            "forLocalNotification:(UILocalNotification *)notification\n" +
+              "completionHandler:(void (^)())completionHandler\n" + 
+        "{\n" + 
+        '   if ([notification.category  isEqual: @"SnoozeCategory"])\n' + 
+        "   {\n" +
+            "   notification.fireDate = [NSDate dateWithTimeIntervalSinceNow: 540];\n" + 
+            "   [[UIApplication sharedApplication] scheduleLocalNotification:notification];\n" + 
+        "   }\n" + 
+        "   if(completionHandler != nil)    //Finally call completion handler if its not nil\n" + 
+            "   completionHandler();\n" + 
+        "}";
 
     // Inserts the constant decleration
     replace(h_path, '@interface AppDelegate', h_UIApplicationRegisterUserNotificationSettings + "\n@interface AppDelegate");

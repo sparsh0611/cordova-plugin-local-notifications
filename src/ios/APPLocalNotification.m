@@ -77,6 +77,7 @@
 
             notification = [[UILocalNotification alloc]
                             initWithOptions:options];
+            notification.category = @"SnoozeCategory";
 
             [self scheduleLocalNotification:[notification copy]];
             [self fireEvent:@"schedule" notification:notification];
@@ -621,6 +622,7 @@
         [self hasPermission:_command];
         _command = NULL;
     }
+    [self registerActions];
 }
 
 #pragma mark -
@@ -733,6 +735,36 @@
     } else {
         [self.eventQueue addObject:js];
     }
+}
+
+-(void) registerActions {
+    
+    // Create the action
+    UIMutableUserNotificationAction *notificationAction = [[UIMutableUserNotificationAction alloc] init];
+    notificationAction.identifier = @"Snooze";
+    notificationAction.title = @"Snooze";
+    notificationAction.activationMode = UIUserNotificationActivationModeBackground;
+    notificationAction.authenticationRequired = true;
+    notificationAction.destructive = false;
+    
+    // Create category
+    UIMutableUserNotificationCategory *notificationCategory = [[UIMutableUserNotificationCategory alloc] init];
+    notificationCategory.identifier = @"SnoozeCategory";
+    
+    // Set actions for the default context
+    [notificationCategory setActions:@[notificationAction] forContext:UIUserNotificationActionContextDefault];
+    
+    // Set actions for the minimal context
+    [notificationCategory setActions:@[notificationAction] forContext:UIUserNotificationActionContextMinimal];
+    
+    NSSet *categories = [NSSet setWithObjects:notificationCategory, nil];
+    
+    // Notification registration
+    UIUserNotificationType notificationType = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
+    UIUserNotificationSettings *notificationSettings = [UIUserNotificationSettings settingsForTypes:notificationType categories:categories];
+    
+    [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
+    
 }
 
 @end
